@@ -44,8 +44,25 @@ mvn spring-boot:run
 ```
 
 ```bash
+mvn clean compile package
+```
+
+```bash
+java -jar target/fantaco-customer-main-1.0.0.jar
+```
+
+```bash
+export CUST_URL=localhost:8081
+```
+
+```bash
 open http://$CUST_URL/api/customers
 ```
+
+```bash
+curl -sS http://$CUST_URL/api/customers | jq
+```
+
 
 ## Podman
 
@@ -188,7 +205,7 @@ curl "{$CUST_URL}/api/customers"
 
 ```bash
 # Search by company name (partial match, case-insensitive)
-curl "$CUST_URL/api/customers?companyName=Alfreds"
+curl "$CUST_URL/api/customers?companyName=Alfreds" | jq
 
 # Search by contact email
 # Finance
@@ -396,10 +413,9 @@ mvn test -Dtest="**/*ContractTest"
 └─────────────────┘
 ```
 
-## License
 
-Proprietary - All rights reserved
+## Cleaning
 
-## Support
-
-For questions or issues, contact the development team.
+```bash
+psql -U postgres -d fantaco_customer -c "DO \$\$ DECLARE r RECORD; BEGIN FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE'; END LOOP; END \$\$;"
+```
