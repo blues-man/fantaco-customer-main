@@ -146,6 +146,7 @@ oc apply -f deployment/kubernetes/application/configmap.yaml
 oc apply -f deployment/kubernetes/application/secret.yaml
 oc apply -f deployment/kubernetes/application/deployment.yaml
 oc apply -f deployment/kubernetes/application/service.yaml
+oc apply -f deployment/kubernetes/application/route.yaml
 ```
 
 ```bash
@@ -159,10 +160,6 @@ postgresql-665b46c48-ttrnd               1/1     Running   0          3m16s
 ```
 
 ```bash
-oc expose service fantaco-customer-service
-```
-
-```bash
 export CUST_URL=http://$(oc get routes -n fantaco -l app=fantaco-customer-main -o jsonpath="{range .items[*]}{.status.ingress[0].host}{end}")
 echo $CUST_URL
 ```
@@ -172,7 +169,7 @@ open $CUST_URL/api/customers
 ```
 
 ```bash
-curl $CUST_URL/api/customers
+curl -sS -L $CUST_URL/api/customers | jq
 ```
 
 ```
@@ -195,54 +192,46 @@ Once the application is running, access:
 export CUST_URL=http://localhost:8081
 ```
 
-### Quick Test
-
-```bash
-curl "{$CUST_URL}/api/customers"
-```
-
 ### Search Customers
 
 ```bash
 # Search by company name (partial match, case-insensitive)
-curl "$CUST_URL/api/customers?companyName=Alfreds" | jq
+curl -sS -L "$CUST_URL/api/customers?companyName=Alfreds" | jq
 
 # Search by contact email
 # Finance
-curl "$CUST_URL/api/customers?contactEmail=liuwong%40example.com"
+curl -sS -L "$CUST_URL/api/customers?contactEmail=liuwong%40example.com" | jq
 # THECR
-curl "$CUST_URL/api/customers?contactEmail=linorodriguez%40example.com"
+curl -sS -L "$CUST_URL/api/customers?contactEmail=linorodriguez%40example.com" | jq
 # FURIB
-curl "$CUST_URL/api/customers?contactEmail=jaimeyorres%40example.com"
+curl -sS -L "$CUST_URL/api/customers?contactEmail=jaimeyorres%40example.com" | jq
 # LETSS
-curl "$CUST_URL/api/customers?contactEmail=hannamoos%40example.com"
+curl -sS -L "$CUST_URL/api/customers?contactEmail=hannamoos%40example.com" | jq
 # BLAUS
-curl "$CUST_URL/api/customers?contactEmail=mariebertrand%40example.com"
+curl -sS -L "$CUST_URL/api/customers?contactEmail=mariebertrand%40example.com" | jq
 # PARIS
 
-curl "$CUST_URL/api/customers?contactEmail=victoriaashworth%40example.com"
-curl "$CUST_URL/api/customers?contactEmail=yangwang%40example.com"
-curl "$CUST_URL/api/customers?contactEmail=peterfranken%40example.com"
-curl "$CUST_URL/api/customers?contactEmail=thomashardy%40example.com"
-curl "$CUST_URL/api/customers?contactEmail=diegoroel%40example.com"
+curl -sS -L "$CUST_URL/api/customers?contactEmail=victoriaashworth%40example.com" | jq
+curl -sS -L "$CUST_URL/api/customers?contactEmail=yangwang%40example.com" | jq
+curl -sS -L "$CUST_URL/api/customers?contactEmail=peterfranken%40example.com" | jq
+curl -sS -L "$CUST_URL/api/customers?contactEmail=thomashardy%40example.com" | jq
+curl -sS -L "$CUST_URL/api/customers?contactEmail=diegoroel%40example.com" | jq
 
-curl "$CUST_URL/api/customers?contactEmail=janetelimeira%40example.com"
-curl "$CUST_URL/api/customers?contactEmail=franwilson%40example.com"
+curl -sS -L "$CUST_URL/api/customers?contactEmail=janetelimeira%40example.com" | jq
+curl -sS -L "$CUST_URL/api/customers?contactEmail=franwilson%40example.com" | jq
 
 # Search by phone
-curl "http://$CUST_URL/api/customers?phone=030"
+curl -sS -L "$CUST_URL/api/customers?phone=030" | jq
 ```
 
 **Response**: `200 OK` with array of customers
-
-
 
 
 ### Create Customer
 
 
 ```bash
-curl -X POST http://$CUST_URL/api/customers \
+curl -L -X POST $CUST_URL/api/customers \
   -H "Content-Type: application/json" \
   -d '{
     "customerId": "ALFKI",
@@ -263,13 +252,13 @@ curl -X POST http://$CUST_URL/api/customers \
 ### Get Customer by ID
 
 ```bash
-curl http://$CUST_URL/api/customers/ALFKI
+curl $CUST_URL/api/customers/ALFKI
 ```
 
 ### Update Customer
 
 ```bash
-curl -X PUT http://$CUST_URL/api/customers/ALFKI \
+curl -X PUT $CUST_URL/api/customers/ALFKI \
   -H "Content-Type: application/json" \
   -d '{
     "companyName": "Alfreds Futterkiste GmbH",
@@ -285,7 +274,7 @@ curl -X PUT http://$CUST_URL/api/customers/ALFKI \
 ### Delete Customer
 
 ```bash
-curl -X DELETE http://$CUST_URL/api/customers/ALFKI
+curl -X DELETE $CUST_URL/api/customers/ALFKI
 ```
 
 **Response**: `204 No Content`
@@ -349,6 +338,7 @@ curl -X DELETE http://$CUST_URL/api/customers/ALFKI
 kubectl apply -f deployment/kubernetes/configmap.yaml
 kubectl apply -f deployment/kubernetes/deployment.yaml
 kubectl apply -f deployment/kubernetes/service.yaml
+kubectl apply -f deployment/kubernetes/route.yaml
 ```
 
 ### Helm Chart
